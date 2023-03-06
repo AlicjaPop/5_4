@@ -1,3 +1,4 @@
+import random
 class MoviesLibrary:
     def __init__(self, title, year, genre):
         self.title = title
@@ -62,5 +63,19 @@ def get_series(list):
         if isinstance(i,SeriesLibrary)==True:
             Series_list.append(i)
     return sorted(Series_list, key=lambda i: i.title)
-    
 
+#Search
+def search(title):
+    search_list=[]
+    for i in movies_and_series_list:
+        if i.title == title:
+            search_list.append(i)
+    return search_list
+
+#generate views
+def generate_views():
+    i=random.choice(movies_and_series_list)
+    i._played_number=i._played_number+random.randint(1,100)
+    return (i.title, i._played_number)
+
+print(generate_views())
