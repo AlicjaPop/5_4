@@ -1,4 +1,5 @@
 import random
+
 class MoviesLibrary:
     def __init__(self, title, year, genre):
         self.title = title
@@ -76,6 +77,26 @@ def search(title):
 def generate_views():
     i=random.choice(movies_and_series_list)
     i._played_number=i._played_number+random.randint(1,100)
-    return (i.title, i._played_number)
+    return (i.title, i._played_number) #zastanowić się czy tak zostawić
 
-print(generate_views())
+#generate views x 10
+def generate_views_10():
+    for n in range (10):
+        generate_views()
+
+#top titles
+def top_titles(content_type):
+    sorted_by_views=sorted(movies_and_series_list, key=lambda i: i._played_number, reverse=True)
+    Movies=[]
+    Series=[]
+    if content_type=="Movie":
+        for i in sorted_by_views:
+            if isinstance(i, MoviesLibrary):
+                 Movies.append(i)
+        return Movies[0:9]
+    elif content_type=="Series":
+        for i in sorted_by_views:
+            if isinstance(i, SeriesLibrary):
+                 Series.append(i)
+        return Series[0:9]
+    
