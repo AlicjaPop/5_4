@@ -1,6 +1,9 @@
 import random
+from datetime import datetime
+from faker import Faker
+fake=Faker()
 
-class MoviesLibrary:
+class AllLibrary:
     def __init__(self, title, year, genre):
         self.title = title
         self.year = year
@@ -15,7 +18,18 @@ class MoviesLibrary:
     def play(self):
         return self._played_number+1
     
-class SeriesLibrary(MoviesLibrary):
+class MoviesLibrary(AllLibrary):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.title} ({self.year})"
+    
+    @property
+    def play(self):
+        return self._played_number+1
+
+class SeriesLibrary(AllLibrary):
     def __init__(self, episode_number, season_number, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.episode_number = episode_number
@@ -27,76 +41,110 @@ class SeriesLibrary(MoviesLibrary):
     @property
     def play(self):
         return self._played_number+1
-    
-movies_and_series_list=[]
 
-#Fakes
-from faker import Faker
-fake=Faker()
+Library=[]
+Series_list=[]
+Movies_list=[]
+genres = ["Action", "Comedy", "Drama", "Horror", "Romance", "Sci-Fi", "Thriller"]
+
+#Random/fake library content
+for i in range (100):
+    title = fake.unique.sentence(nb_words=3, variable_nb_words=True, ext_word_list=None)
+    year = fake.year()
+    genre = random.choice(genres)
+    Movie=MoviesLibrary(title, year, genre)
+    Library.append(Movie)
 
 for i in range (100):
-    title = fake.name()
+    episode_number = random.randint(1,20)
+    season_number = random.randint(1,20)
+    title = fake.unique.sentence(nb_words=3, variable_nb_words=True, ext_word_list=None)
     year = fake.year()
-    genre = fake.company()
-    Movie=MoviesLibrary(title, year, genre)
-    movies_and_series_list.append(Movie)
-
-for i in range (50):
-    episode_number = i
-    season_number = i + 1
-    title = fake.name()
-    year = fake.year()
-    genre = fake.company()
+    genre = random.choice(genres)
     Series_episode=SeriesLibrary(episode_number,season_number,title,year,genre)
-    movies_and_series_list.append(Series_episode)
+    Library.append(Series_episode)
 
-#Filters
+# Filters
 def get_movies(list):
-    Movies_list=[]
     for i in list:
         if isinstance(i,MoviesLibrary)==True:
-            Movies_list.append(i)
-    return sorted(Movies_list, key=lambda i: i.title)
+            Movies_list.append(str(i))
+    result=sorted(Movies_list)
+    return result
     
 def get_series(list):
-    Series_list=[]
     for i in list:
         if isinstance(i,SeriesLibrary)==True:
-            Series_list.append(i)
-    return sorted(Series_list, key=lambda i: i.title)
+            Series_list.append(str(i))
+    result=sorted(Series_list)
+    return result
 
-#Search
+# Search
 def search(title):
     search_list=[]
-    for i in movies_and_series_list:
+    for i in Library:
         if i.title == title:
-            search_list.append(i)
+            search_list.append(str(i))
     return search_list
 
-#generate views
+# generate views
 def generate_views():
-    i=random.choice(movies_and_series_list)
+    i=random.choice(Library)
     i._played_number=i._played_number+random.randint(1,100)
-    return (i.title, i._played_number) #zastanowić się czy tak zostawić
+    return ((i.title, i._played_number))
 
-#generate views x 10
+# generate views x 10
 def generate_views_10():
     for n in range (10):
         generate_views()
 
-#top titles
-def top_titles(content_type):
-    sorted_by_views=sorted(movies_and_series_list, key=lambda i: i._played_number, reverse=True)
+# top titles
+def top_titles(content_type,n):
+    sorted_by_views=sorted(Library, key=lambda i: i._played_number, reverse=True)
     Movies=[]
     Series=[]
-    if content_type=="Movie":
+    if content_type=="Series":
         for i in sorted_by_views:
-            if isinstance(i, MoviesLibrary):
-                 Movies.append(i)
-        return Movies[0:9]
-    elif content_type=="Series":
+            if isinstance(i, SeriesLibrary)==True:
+                 Series.append((str(i), i._played_number))
+        return Series[0:n]
+    elif content_type=="Movies":
         for i in sorted_by_views:
-            if isinstance(i, SeriesLibrary):
-                 Series.append(i)
-        return Series[0:9]
+            if isinstance(i, MoviesLibrary)==True:
+                 Movies.append((str(i), i._played_number))
+        return Movies[0:n]
     
+# Add Season
+def add_season():
+    title=input("Podaj tytuł serialu:")
+    year=input("Podaj rok produkcji:")
+    genre=input("Podaj gatunek:")
+    season_number=input("Podaj numer sezonu:")
+    number_of_episodes=int(input("Podaj liczbę odcinków:"))
+    for i in range(number_of_episodes):
+        Library.append(SeriesLibrary(title, year, genre, i+1, season_number,))
+    print(f"Dodano sezon {season_number} (liczba odcinków:", number_of_episodes, f") serialu {title} do biblioteki")
+
+# How many episodes
+def series_no_episodes(title):
+    x=[]
+    for i in Library:
+        if isinstance(i,SeriesLibrary)==True:
+            if i.title==title:
+                x.append(str(i))
+    return print(f"Liczba odcinków serialu {title} w bibliotece:", len(x))
+    
+print("Biblioteka filmów")
+
+generate_views_10()
+
+today=datetime.today()
+formatted_today=today.strftime("%d.%m.%Y")
+
+print(f"Najpopolularniejsze filmy i seriale dnia {formatted_today}:")
+
+print("Filmy:")
+print(top_titles("Movies", 3))
+
+print("Seriale:")
+print(top_titles("Series", 3))
