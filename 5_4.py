@@ -64,6 +64,9 @@ for i in range (100):
     Series_episode=SeriesLibrary(episode_number,season_number,title,year,genre)
     Library.append(Series_episode)
 
+Series_1=SeriesLibrary(title="Pulp Fiction", year="1994", genre="Comedy", episode_number=10, season_number=10)
+Library.append(Series_1)
+
 # Filters
 def get_movies(list):
     for i in list:
